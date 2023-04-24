@@ -5,7 +5,7 @@ export default function Home() {
 
   return (
     <main>
-      hello world
+      hello world2
     </main>
   )
 }
