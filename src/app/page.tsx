@@ -1,7 +1,6 @@
 "use client";
 import {
   checkUpdate,
-  installUpdate,
   onUpdaterEvent,
 } from '@tauri-apps/api/updater';
 import { useEffect, useState } from 'react';
