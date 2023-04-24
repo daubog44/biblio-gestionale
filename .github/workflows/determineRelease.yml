@@ -3,9 +3,10 @@ on:
   push:
     branches:
       - main
-      
+
 jobs:
   create-tag:
+    permissions: read-all|write-all
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -17,7 +18,7 @@ jobs:
           prop_path: "package.version"
       - run: |
           echo ${{steps.get_tag.outputs.value}}
-      
+
       - uses: rickstaa/action-create-tag@v1
         id: "tag_create"
         with:
@@ -26,7 +27,7 @@ jobs:
           message: "Latest release"
 
       # Print result using the env variable.
-      -  run: |
+      - run: |
           echo "Tag already present: ${{ env.TAG_EXISTS }}"
 
       # Print result using the action output.
