@@ -1,9 +1,9 @@
 name: Release
 on:
-  push:
-    tags:
-      - "v*"
-  workflow_dispatch:
+  workflow_run:
+    workflows: ["Create/update tag"]
+    types:
+      - completed
 
 jobs:
   release:
