@@ -1,13 +1,37 @@
 name: Release
 on:
-  workflow_run:
-    workflows: ["Create/update tag"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
 
 jobs:
+  createTag:
+    runs-on: ubuntu-latest
+
+    outputs:
+      tag: ${{ steps.get_tag.outputs.value }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: get specified property
+        id: "get_tag"
+        uses: zoexx/github-action-json-file-properties@release
+        with:
+          file_path: "./src-tauri/tauri.conf.json"
+          prop_path: "package.version"
+
+      - uses: rickstaa/action-create-tag@v1
+        id: "tag_create"
+        with:
+          tag: ${{steps.get_tag.outputs.value}}
+          tag_exists_error: true
+          message: "Latest release"
+
+      # Print result using the action output.
+      - run: |
+          echo "Tag already present: ${{ steps.tag_create.outputs.tag_exists }}"
+
   release:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: createTag
     permissions:
       contents: write
     strategy:
@@ -53,8 +77,8 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ vars.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ vars.TAURI_KEY_PASSWORD }}
         with:
-          tagName: ${{ github.ref_name }} # This only works if your workflow triggers on new tags.
-          releaseName: "App Name ${{ github.ref_name }}" # tauri-action replaces \_\_VERSION\_\_ with the app version.
+          tagName: ${{ needs.createTag.outputs.tag }} # This only works if your workflow triggers on new tags.
+          releaseName: "App Name ${{ needs.createTag.outputs.tag }}" # tauri-action replaces \_\_VERSION\_\_ with the app version.
           releaseBody: "See the assets to download and install this version."
           releaseDraft: true
           prerelease: false
